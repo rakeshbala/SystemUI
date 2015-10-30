@@ -31,6 +31,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.OverScroller;
 
 import com.android.systemui.ExpandHelper;
@@ -615,6 +616,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         // find the view closest to the location, accounting for GONE views
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
+
             ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
             if (slidingChild.getVisibility() == GONE
                     || slidingChild instanceof StackScrollerDecorView
@@ -1656,6 +1658,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected void onViewAdded(View child) {
         super.onViewAdded(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
+        /** RB: ignore if button **/
+        if(child instanceof Button){
+            return;
+        }
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
@@ -2145,7 +2151,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
-                ExpandableView v = (ExpandableView) getChildAt(i);
+                View child = getChildAt(i);
+                if (child instanceof Button){
+                    continue;
+                }
+                ExpandableView v = (ExpandableView) child;
                 v.setHideSensitiveForIntrinsicHeight(hideSensitive);
             }
             mAmbientState.setHideSensitive(hideSensitive);
@@ -2390,7 +2400,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int count = getChildCount();
         float max = 0;
         for (int childIdx = 0; childIdx < count; childIdx++) {
-            ExpandableView child = (ExpandableView) getChildAt(childIdx);
+            View childTemp = getChildAt(childIdx);
+            if (childTemp instanceof  Button){
+                continue;
+            }
+            ExpandableView child = (ExpandableView) childTemp;
             if (child.getVisibility() == GONE) {
                 continue;
             }
@@ -2422,6 +2436,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean isBelowLastNotification(float touchX, float touchY) {
+        
         ExpandableView lastChildNotGone = (ExpandableView) getLastChildNotGone();
         if (lastChildNotGone == null) {
             return touchY > mIntrinsicPadding;

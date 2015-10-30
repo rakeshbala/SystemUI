@@ -1394,11 +1394,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             //Add buttons to small view
             LayoutParams siblingParam = contentViewLocal.getLayoutParams();
             android.widget.Button hide = new Button(mContext);
-            RelativeLayout.LayoutParams hideParam = new RelativeLayout.LayoutParams(25  ,siblingParam.height);
-            hideParam.addRule(RelativeLayout.RIGHT_OF,contentViewLocal.getId());
+            RelativeLayout.LayoutParams hideParam = new RelativeLayout.LayoutParams(25,siblingParam.height);
+            hideParam.addRule(RelativeLayout.LEFT_OF,row.getId());
             hide.setText("Hide");
             hide.setBackgroundColor(Color.RED);
-            expanded.addView(hide,hideParam);
+            parent.addView(hide, hideParam);
             Log.d("YAAP","Added button to content view");
         }
         if (bigContentViewLocal != null) {
@@ -1409,10 +1409,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             LayoutParams siblingParam = bigContentViewLocal.getLayoutParams();
             android.widget.Button hide = new Button(mContext);
             RelativeLayout.LayoutParams hideParam = new RelativeLayout.LayoutParams(25,siblingParam.height);
-            hideParam.addRule(RelativeLayout.RIGHT_OF,bigContentViewLocal.getId());
+            hideParam.addRule(RelativeLayout.LEFT_OF,row.getId());
             hide.setText("Hide");
             hide.setBackgroundColor(Color.RED);
-            expanded.addView(hide,hideParam);
+            parent.addView(hide,hideParam);
 
             Log.d("YAAP","Added button to big content view");
         }
