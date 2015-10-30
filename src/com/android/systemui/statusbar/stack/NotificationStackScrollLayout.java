@@ -1658,10 +1658,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected void onViewAdded(View child) {
         super.onViewAdded(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
-        /** RB: ignore if button **/
-        if(child instanceof Button){
-            return;
-        }
+
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
@@ -2152,9 +2149,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
-                if (child instanceof Button){
-                    continue;
-                }
                 ExpandableView v = (ExpandableView) child;
                 v.setHideSensitiveForIntrinsicHeight(hideSensitive);
             }
@@ -2401,9 +2395,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         float max = 0;
         for (int childIdx = 0; childIdx < count; childIdx++) {
             View childTemp = getChildAt(childIdx);
-            if (childTemp instanceof  Button){
-                continue;
-            }
             ExpandableView child = (ExpandableView) childTemp;
             if (child.getVisibility() == GONE) {
                 continue;
