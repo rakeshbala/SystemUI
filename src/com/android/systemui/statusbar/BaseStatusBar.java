@@ -39,6 +39,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -1523,33 +1524,31 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private void addMetaButtons(ExpandableNotificationRow parent, View sibling) {
-        Button hide = createMetaButton(sibling, parent, R.layout.notification_sticky_hide_button, "Hide");
-        Button close = createMetaButton(sibling,parent, R.layout.notification_sticky_close_button, "Close");
+        Button hide = createMetaButton(sibling, Color.BLUE,"Hide",1001);
+        Button close = createMetaButton(sibling,Color.RED, "Close", 1002);
+
+        RelativeLayout.LayoutParams hideParam = (RelativeLayout.LayoutParams) hide.getLayoutParams();
+        hideParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        RelativeLayout.LayoutParams closeParam = (RelativeLayout.LayoutParams) close.getLayoutParams();
+        closeParam.addRule(RelativeLayout.RIGHT_OF,hide.getId());
 
 
-        parent.addView(hide);
-        parent.addView(close);
+        RelativeLayout layout = new RelativeLayout(mContext);
+        layout.addView(hide);
+        layout.addView(close);
 
-        LayoutParams hideParam =  hide.getLayoutParams();
-        hideParam.height = sibling.getLayoutParams().height;
-        hideParam.width = 10;
-        hide.setLayoutParams(hideParam);
-
-        LayoutParams closeParam =  close.getLayoutParams();
-        closeParam.height = sibling.getLayoutParams().height;
-        closeParam.width = 10;
-        close.setLayoutParams(closeParam);
-
-        hide.requestLayout();
-        close.requestLayout();
-
+//        parent.addView(hide);
+        parent.addView(layout);
     }
 
-    private Button createMetaButton(View contentViewLocal, ViewGroup parent, int id, String text) {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        LayoutParams siblingParam = contentViewLocal.getLayoutParams();
-        Button button = (Button) inflater.inflate(id,null);
+    private Button createMetaButton(View sibling, int color, String text, int id) {
+        LayoutParams siblingParam = sibling.getLayoutParams();
+        Button button = new Button(mContext);
         button.setText(text);
+        button.setBackgroundColor(color);
+        LayoutParams buttonParam =  new RelativeLayout.LayoutParams(0,siblingParam.height);
+        button.setLayoutParams(buttonParam);
+        button.setId(id);
         return button;
     }
 
