@@ -566,6 +566,16 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
+    public void onLeftSwipeWithDelta(float delta, View view) {
+        Log.d("YAAP","Left swipe");
+    }
+
+    @Override
+    public void onRightSwipeWithDelta(float delta, View view) {
+        Log.d("YAAP","Right swipe");
+    }
+
+    @Override
     public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
         return false;
     }

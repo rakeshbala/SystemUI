@@ -193,7 +193,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         });
         mVetoButton = findViewById(R.id.veto);
 
-        /** RB: Add gesture listener **/
+
+        Log.d("YAAP","onFinishInflate - ExpandableNotificationRow");
+
+
 
 
     }

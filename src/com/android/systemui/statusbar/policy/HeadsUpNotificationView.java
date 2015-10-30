@@ -44,8 +44,6 @@ import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
-import java.util.ArrayList;
-
 public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback,
         ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = "HeadsUpNotificationView";
@@ -402,6 +400,16 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     @Override
     public void onChildSnappedBack(View animView) {
+    }
+
+    @Override
+    public void onLeftSwipeWithDelta(float delta, View view) {
+        /** used by NotifcationStackScrollLayout **/
+    }
+
+    @Override
+    public void onRightSwipeWithDelta(float delta, View view) {
+        /** used by NotifcationStackScrollLayout **/
     }
 
     @Override

@@ -234,6 +234,17 @@ public class RecentsVerticalScrollView extends ScrollView
 
     @Override
     public void onChildSnappedBack(View animView) {
+        /** used by NotifcationStackScrollLayout **/
+    }
+
+    @Override
+    public void onLeftSwipeWithDelta(float delta, View view) {
+        /** used by NotifcationStackScrollLayout **/
+    }
+
+    @Override
+    public void onRightSwipeWithDelta(float delta, View view) {
+
     }
 
     @Override

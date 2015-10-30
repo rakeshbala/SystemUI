@@ -26,6 +26,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
@@ -73,6 +74,10 @@ public class NotificationContentView extends FrameLayout {
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        Log.d("YAAP", " NotificationContentView - Notif content view"+getExpandedChild());
+        for (int i=0;i<getChildCount();i++){
+            Log.d("YAAP","NotificationContentView - Child "+getChildAt(i));
+        }
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
         reset(true);
     }

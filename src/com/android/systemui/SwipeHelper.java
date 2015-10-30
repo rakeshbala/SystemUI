@@ -372,11 +372,11 @@ public class SwipeHelper implements Gefingerpoken {
         ObjectAnimator anim = createTranslationAnimation(animView, 0);
         int duration = SNAP_ANIM_LEN;
         anim.setDuration(duration);
-        anim.addUpdateListener(new AnimatorUpdateListener() {
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
-            }
-        });
+         anim.addUpdateListener(new AnimatorUpdateListener() {
+             public void onAnimationUpdate(ValueAnimator animation) {
+                 updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
+             }
+         });
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animator) {
                 updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
@@ -422,15 +422,27 @@ public class SwipeHelper implements Gefingerpoken {
                     // don't let items that can't be dismissed be dragged more than
                     // maxScrollDistance
                     if (CONSTRAIN_SWIPE && !mCallback.canChildBeDismissed(mCurrView)) {
+
+
                         float size = getSize(mCurrAnimView);
-                        float maxScrollDistance = 0.15f * size;
-                        
+//                        float maxScrollDistance = 0.15f * size;
+                        /** RB: increase maxScrollDistance **/
+                        float maxScrollDistance = 0.30f * size;
                         if (absDelta >= size) {
                             delta = delta > 0 ? maxScrollDistance : -maxScrollDistance;
                         } else {
                             delta = maxScrollDistance * (float) Math.sin((delta/size)*(Math.PI/2));
                         }
+
+                        /** RB: callback to be called from delegate object **/
+                        if(delta < 0){  //Left swipe
+                            mCallback.onLeftSwipeWithDelta(Math.abs(delta),mCurrView);
+                        }else{ //Right swipe
+                            mCallback.onRightSwipeWithDelta(Math.abs(delta),mCurrView);
+                        }
                     }
+                    Log.d("YAAP","AbsDelta "+absDelta+" Delta "+delta);
+
                     setTranslation(mCurrAnimView, delta);
 
                     updateSwipeProgressFromOffset(mCurrAnimView, mCanCurrViewBeDimissed);
@@ -465,6 +477,7 @@ public class SwipeHelper implements Gefingerpoken {
                     } else {
                         // snappity
                         mCallback.onDragCancelled(mCurrView);
+                        /***** RB: Comment for removing snapping *****/
                         snapChild(mCurrView, velocity);
                     }
                 }
@@ -494,6 +507,9 @@ public class SwipeHelper implements Gefingerpoken {
         void onDragCancelled(View v);
 
         void onChildSnappedBack(View animView);
+
+        void onLeftSwipeWithDelta(float delta, View view);
+        void onRightSwipeWithDelta(float delta, View view);
 
         /**
          * Updates the swipe progress on a child.

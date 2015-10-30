@@ -39,6 +39,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -75,12 +76,9 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
-import android.widget.DateTimeView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RemoteViews;
-import android.widget.TextView;
+import android.widget.*;
 
+import android.widget.Button;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -1375,6 +1373,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         try {
             contentViewLocal = contentView.apply(mContext, expanded,
                     mOnClickHandler);
+            Log.d("YAAP","inflateViews - Base Status Bar");
             if (bigContentView != null) {
                 bigContentViewLocal = bigContentView.apply(mContext, expanded,
                         mOnClickHandler);
@@ -1386,13 +1385,36 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
+        /** RB: add the buttons **/
+
         if (contentViewLocal != null) {
             contentViewLocal.setIsRootNamespace(true);
             expanded.setContractedChild(contentViewLocal);
+
+            //Add buttons to small view
+            LayoutParams siblingParam = contentViewLocal.getLayoutParams();
+            android.widget.Button hide = new Button(mContext);
+            RelativeLayout.LayoutParams hideParam = new RelativeLayout.LayoutParams(25  ,siblingParam.height);
+            hideParam.addRule(RelativeLayout.RIGHT_OF,contentViewLocal.getId());
+            hide.setText("Hide");
+            hide.setBackgroundColor(Color.RED);
+            expanded.addView(hide,hideParam);
+            Log.d("YAAP","Added button to content view");
         }
         if (bigContentViewLocal != null) {
             bigContentViewLocal.setIsRootNamespace(true);
             expanded.setExpandedChild(bigContentViewLocal);
+
+            /** add buttons to big view **/
+            LayoutParams siblingParam = bigContentViewLocal.getLayoutParams();
+            android.widget.Button hide = new Button(mContext);
+            RelativeLayout.LayoutParams hideParam = new RelativeLayout.LayoutParams(25,siblingParam.height);
+            hideParam.addRule(RelativeLayout.RIGHT_OF,bigContentViewLocal.getId());
+            hide.setText("Hide");
+            hide.setBackgroundColor(Color.RED);
+            expanded.addView(hide,hideParam);
+
+            Log.d("YAAP","Added button to big content view");
         }
 
         // now the public version
