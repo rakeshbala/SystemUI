@@ -565,33 +565,35 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void onLeftSwipeWithDelta(float delta, View view) {
         Button hide = (Button) view.findViewById(1001);
-        int newWidth = (int) (hide.getLayoutParams().width-delta);
-        hide.getLayoutParams().width =  newWidth<=0?0:newWidth;
+        int newWidthHi = (int) (hide.getLayoutParams().width-delta);
+        hide.getLayoutParams().width =  newWidthHi<=0?0:newWidthHi;
         hide.requestLayout();
 
         Button close = (Button) view.findViewById(1002);
-        int currWidth = close.getLayoutParams().width;
-        if (delta > currWidth){
-            close.getLayoutParams().width = delta>250?250:(int) delta;
-            close.requestLayout();
-        }
+        int newWidthCl = (int) (close.getLayoutParams().width-delta);
+        close.getLayoutParams().width =  newWidthCl<=0?0:newWidthCl;
+        close.requestLayout();
 
     }
 
     @Override
     public void onRightSwipeWithDelta(float delta, View view) {
         Button hide = (Button) view.findViewById(1001);
-        int currWidth = hide.getLayoutParams().width;
-        if(delta> currWidth){
+        int currWidthHi = hide.getLayoutParams().width;
+        if(delta> currWidthHi){
             hide.getLayoutParams().width = delta>250?250:(int) delta;
             hide.requestLayout();
         }
 
-
         Button close = (Button) view.findViewById(1002);
-        int newWidth = (int) (close.getLayoutParams().width-delta);
-        close.getLayoutParams().width =  newWidth<=0?0:newWidth;
-        close.requestLayout();
+        int currWidthCl = close.getLayoutParams().width;
+        if (delta > currWidthCl){
+            close.getLayoutParams().width = delta>250?250:(int) delta;
+            close.requestLayout();
+        }
+
+
+
     }
 
     @Override
