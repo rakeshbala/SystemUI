@@ -17,19 +17,16 @@
 package com.android.systemui.statusbar.stack;
 
 import android.annotation.Nullable;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.VelocityTracker;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.view.*;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.OverScroller;
@@ -37,15 +34,9 @@ import android.widget.OverScroller;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.statusbar.ActivatableNotificationView;
-import com.android.systemui.statusbar.DismissView;
-import com.android.systemui.statusbar.EmptyShadeView;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.SpeedBumpView;
-import com.android.systemui.statusbar.StackScrollerDecorView;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.*;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 
@@ -110,6 +101,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mTopPadding;
     private int mCollapseSecondCardPadding;
 
+    private int swipeDirection = 0;
+
+    private final int SWIPE_LEFT = 1;
+    private final int SWIPE_RIGHT = 2;
+    private final int SWIPE_NONE = 0;
     /**
      * The algorithm which calculates the properties for our children
      */
@@ -568,11 +564,34 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onLeftSwipeWithDelta(float delta, View view) {
-        Log.d("YAAP","Left swipe");
+        Button hide = (Button) view.findViewById(R.id.StickyNotifButtonHide);
+        int newWidth = (int) (hide.getLayoutParams().width-delta);
+        hide.getLayoutParams().width =  newWidth<=0?0:newWidth;
+        hide.requestLayout();
+
+        Button close = (Button) view.findViewById(R.id.StickyNotifButtonClose);
+        int currWidth = close.getLayoutParams().width;
+        if (delta > currWidth){
+            close.getLayoutParams().width = delta>250?250:(int) delta;
+            close.requestLayout();
+        }
+
     }
 
     @Override
     public void onRightSwipeWithDelta(float delta, View view) {
+        Button hide = (Button) view.findViewById(R.id.StickyNotifButtonHide);
+        int currWidth = hide.getLayoutParams().width;
+        if(delta> currWidth){
+            hide.getLayoutParams().width = delta>250?250:(int) delta;
+            hide.requestLayout();
+        }
+
+
+        Button close = (Button) view.findViewById(R.id.StickyNotifButtonClose);
+        int newWidth = (int) (close.getLayoutParams().width-delta);
+        close.getLayoutParams().width =  newWidth<=0?0:newWidth;
+        close.requestLayout();
         Log.d("YAAP","Right swipe");
     }
 
@@ -599,6 +618,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void onDragCancelled(View v) {
         Log.d("YAAP","On Drag cancelled");
+
+
         setSwipingInProgress(false);
     }
 

@@ -39,7 +39,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -62,18 +61,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.view.Display;
-import android.view.IWindowManager;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewParent;
-import android.view.ViewStub;
-import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
@@ -1392,13 +1381,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             expanded.setContractedChild(contentViewLocal);
 
             //Add buttons to small view
-            LayoutParams siblingParam = contentViewLocal.getLayoutParams();
-            android.widget.Button hide = new Button(mContext);
-            RelativeLayout.LayoutParams hideParam = new RelativeLayout.LayoutParams(25,siblingParam.height);
-            hideParam.addRule(RelativeLayout.LEFT_OF,row.getId());
-            hide.setText("Hide");
-            hide.setBackgroundColor(Color.RED);
-            parent.addView(hide, hideParam);
+            addMetaButtons(row, contentViewLocal);
             Log.d("YAAP","Added button to content view");
         }
         if (bigContentViewLocal != null) {
@@ -1406,14 +1389,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             expanded.setExpandedChild(bigContentViewLocal);
 
             /** add buttons to big view **/
-            LayoutParams siblingParam = bigContentViewLocal.getLayoutParams();
-            android.widget.Button hide = new Button(mContext);
-            RelativeLayout.LayoutParams hideParam = new RelativeLayout.LayoutParams(25,siblingParam.height);
-            hideParam.addRule(RelativeLayout.LEFT_OF,row.getId());
-            hide.setText("Hide");
-            hide.setBackgroundColor(Color.RED);
-            parent.addView(hide,hideParam);
-
+            addMetaButtons(row,bigContentViewLocal);
             Log.d("YAAP","Added button to big content view");
         }
 
@@ -1544,6 +1520,37 @@ public abstract class BaseStatusBar extends SystemUI implements
         row.setUserLocked(userLocked);
         row.setStatusBarNotification(entry.notification);
         return true;
+    }
+
+    private void addMetaButtons(ExpandableNotificationRow parent, View sibling) {
+        Button hide = createMetaButton(sibling, parent, R.layout.notification_sticky_hide_button, "Hide");
+        Button close = createMetaButton(sibling,parent, R.layout.notification_sticky_close_button, "Close");
+
+
+        parent.addView(hide);
+        parent.addView(close);
+
+        LayoutParams hideParam =  hide.getLayoutParams();
+        hideParam.height = sibling.getLayoutParams().height;
+        hideParam.width = 10;
+        hide.setLayoutParams(hideParam);
+
+        LayoutParams closeParam =  close.getLayoutParams();
+        closeParam.height = sibling.getLayoutParams().height;
+        closeParam.width = 10;
+        close.setLayoutParams(closeParam);
+
+        hide.requestLayout();
+        close.requestLayout();
+
+    }
+
+    private Button createMetaButton(View contentViewLocal, ViewGroup parent, int id, String text) {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        LayoutParams siblingParam = contentViewLocal.getLayoutParams();
+        Button button = (Button) inflater.inflate(id,null);
+        button.setText(text);
+        return button;
     }
 
     public NotificationClicker makeClicker(PendingIntent intent, String notificationKey,
@@ -2200,5 +2207,10 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public boolean isKeyguardSecure() {
         return mStatusBarKeyguardViewManager.isSecure();
+    }
+
+
+    public void addButtonToRow(ViewGroup parent){
+
     }
 }

@@ -436,10 +436,11 @@ public class SwipeHelper implements Gefingerpoken {
 
                         /** RB: callback to be called from delegate object **/
                         if(delta < 0){  //Left swipe
-                            mCallback.onLeftSwipeWithDelta(Math.abs(delta),mCurrView);
+                            mCallback.onLeftSwipeWithDelta(Math.abs(absDelta),mCurrView);
                         }else{ //Right swipe
-                            mCallback.onRightSwipeWithDelta(Math.abs(delta),mCurrView);
+                            mCallback.onRightSwipeWithDelta(Math.abs(absDelta),mCurrView);
                         }
+                        delta = 0;
                     }
                     Log.d("YAAP","AbsDelta "+absDelta+" Delta "+delta);
 

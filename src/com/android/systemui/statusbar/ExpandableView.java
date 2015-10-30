@@ -42,11 +42,13 @@ public abstract class ExpandableView extends FrameLayout {
     private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
 
+
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mMaxNotificationHeight = getResources().getDimensionPixelSize(
                 R.dimen.notification_max_height);
     }
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
