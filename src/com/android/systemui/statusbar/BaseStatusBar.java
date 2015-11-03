@@ -26,11 +26,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.app.admin.DevicePolicyManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -42,16 +38,7 @@ import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.UserHandle;
-import android.os.UserManager;
+import android.os.*;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -1523,9 +1510,43 @@ public abstract class BaseStatusBar extends SystemUI implements
         return true;
     }
 
-    private void addMetaButtons(ExpandableNotificationRow parent, View sibling) {
+    private void addMetaButtons(final ExpandableNotificationRow parent, View sibling) {
         Button hide = createMetaButton(sibling, Color.BLUE,"Hide",1001);
-        Button close = createMetaButton(sibling,Color.RED, "Close", 1002);
+        Button close = createMetaButton(sibling,Color.RED, "Kill", 1002);
+
+        hide.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((ViewGroup)parent.getParent()).removeView(parent);
+            }
+        });
+
+
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try{
+                    Intent closeIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    closeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(closeIntent);
+                }catch (ActivityNotFoundException ex){
+//                    Intent closeIntent = new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
+//                    closeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    mContext.startActivity(closeIntent);
+                    ActivityManager am = (ActivityManager)mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                    List<ActivityManager.RunningAppProcessInfo> procLi = am.getRunningAppProcesses();
+                    for (ActivityManager.RunningAppProcessInfo currProc : procLi) {
+                        Log.d("YAAP","Pid to be killed "+currProc.processName + " "+ parent.getStatusBarNotification().getPackageName());
+
+                        if (currProc.processName
+                                .equalsIgnoreCase(parent.getStatusBarNotification().getPackageName())) {
+                            android.os.Process.killProcess(currProc.pid);
+                        }
+                    }
+                }
+
+            }
+        });
 
         RelativeLayout.LayoutParams hideParam = (RelativeLayout.LayoutParams) hide.getLayoutParams();
         hideParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
