@@ -38,6 +38,7 @@ import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.*;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
@@ -1351,6 +1352,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             contentViewLocal = contentView.apply(mContext, expanded,
                     mOnClickHandler);
             Log.d("YAAP","inflateViews - Base Status Bar");
+            Log.d("YAAP","Package name "+sbn.getPackageName());
             if (bigContentView != null) {
                 bigContentViewLocal = bigContentView.apply(mContext, expanded,
                         mOnClickHandler);
@@ -1368,8 +1370,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             contentViewLocal.setIsRootNamespace(true);
             expanded.setContractedChild(contentViewLocal);
 
+
             //Add buttons to small view
             addMetaButtons(row, contentViewLocal);
+
             Log.d("YAAP","Added button to content view");
         }
         if (bigContentViewLocal != null) {
@@ -1513,10 +1517,15 @@ public abstract class BaseStatusBar extends SystemUI implements
     private void addMetaButtons(final ExpandableNotificationRow parent, View sibling) {
         Button hide = createMetaButton(sibling, Color.BLUE,"Hide",1001);
         Button close = createMetaButton(sibling,Color.RED, "Kill", 1002);
-
         hide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                final StatusBarNotification sbn = parent.getStatusBarNotification();
+                Entry en = mNotificationData.remove(sbn.getKey(),null);
+                ViewGroup icParent = (ViewGroup) en.icon.getParent();
+                if(icParent!=null){
+                    icParent.removeView(en.icon);
+                }
                 ((ViewGroup)parent.getParent()).removeView(parent);
             }
         });
@@ -1526,23 +1535,22 @@ public abstract class BaseStatusBar extends SystemUI implements
             @Override
             public void onClick(View view) {
                 try{
+                    //ActivityManagerNative.getDefault().resumeAppSwitches();
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
+
+                    StatusBarNotification sbn = parent.getStatusBarNotification();
                     Intent closeIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     closeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    closeIntent.setData(Uri.parse("package:" + sbn.getPackageName()));
+                    closeIntent.addCategory(Intent.CATEGORY_DEFAULT);
+
                     mContext.startActivity(closeIntent);
                 }catch (ActivityNotFoundException ex){
-//                    Intent closeIntent = new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
-//                    closeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    mContext.startActivity(closeIntent);
-                    ActivityManager am = (ActivityManager)mContext.getSystemService(Context.ACTIVITY_SERVICE);
-                    List<ActivityManager.RunningAppProcessInfo> procLi = am.getRunningAppProcesses();
-                    for (ActivityManager.RunningAppProcessInfo currProc : procLi) {
-                        Log.d("YAAP","Pid to be killed "+currProc.processName + " "+ parent.getStatusBarNotification().getPackageName());
 
-                        if (currProc.processName
-                                .equalsIgnoreCase(parent.getStatusBarNotification().getPackageName())) {
-                            android.os.Process.killProcess(currProc.pid);
-                        }
-                    }
+                    Intent closeIntent = new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
+                    closeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(closeIntent);
+
                 }
 
             }
@@ -1557,8 +1565,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         RelativeLayout layout = new RelativeLayout(mContext);
         layout.addView(hide);
         layout.addView(close);
-
-//        parent.addView(hide);
         parent.addView(layout);
     }
 
@@ -2230,7 +2236,4 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
 
-    public void addButtonToRow(ViewGroup parent){
-
-    }
 }
