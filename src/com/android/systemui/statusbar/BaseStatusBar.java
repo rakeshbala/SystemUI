@@ -1373,7 +1373,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             //Add buttons to small view
             addMetaButtons(row, contentViewLocal);
-
             Log.d("YAAP","Added button to content view");
         }
         if (bigContentViewLocal != null) {
@@ -1522,6 +1521,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             public void onClick(View view) {
                 final StatusBarNotification sbn = parent.getStatusBarNotification();
                 Entry en = mNotificationData.remove(sbn.getKey(),null);
+                HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+                hNotifData.add(en.notification.getKey(),en,en.notification);
                 ViewGroup icParent = (ViewGroup) en.icon.getParent();
                 if(icParent!=null){
                     icParent.removeView(en.icon);
@@ -1738,7 +1739,12 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected StatusBarNotification removeNotificationViews(String key, RankingMap ranking) {
         NotificationData.Entry entry = mNotificationData.remove(key, ranking);
         if (entry == null) {
-            Log.w(TAG, "removeNotification for unknown key: " + key);
+            /** RB: remove from hidden Notif views. Hidden notif data shouldn't contain
+             * notification if it is present in mNotificationData **/
+            entry = (Entry) HiddenNotificationData.getSharedInstance().remove(key);
+            if (entry == null){
+                Log.w(TAG, "removeNotification for unknown key: " + key);
+            }
             return null;
         }
         updateNotifications();
@@ -1779,6 +1785,12 @@ public abstract class BaseStatusBar extends SystemUI implements
             return;
         }
         // Add the expanded view and icon.
+        HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+        if(hNotifData.get(entry.notification.getKey()) != null){
+            hNotifData.add(entry.notification.getKey(),entry,entry.notification);
+            return;
+        }
+
         mNotificationData.add(entry, ranking);
         updateNotifications();
     }

@@ -161,6 +161,9 @@ public class NotificationData {
     }
 
     public void add(Entry entry, RankingMap ranking) {
+
+        /** RB:  **/
+
         mEntries.put(entry.notification.getKey(), entry);
         updateRankingAndSort(ranking);
     }
