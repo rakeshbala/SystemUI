@@ -194,10 +194,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mVetoButton = findViewById(R.id.veto);
 
 
-        Log.d("YAAP","onFinishInflate - ExpandableNotificationRow");
-
-
-
 
     }
 
@@ -313,7 +309,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return Can the underlying notification be cleared?
      */
     public boolean isClearable() {
-        Log.d("YAAP","iClearable");
         return mStatusBarNotification != null && mStatusBarNotification.isClearable();
     }
 
@@ -435,7 +430,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private void updateVetoButton() {
         // public versions cannot be dismissed
-        Log.d("YAAP", "Update veto button - Expandable Notificiation row");
         mVetoButton.setVisibility(isClearable() && !mShowingPublic ? View.VISIBLE : View.GONE);
     }
 

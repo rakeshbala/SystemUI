@@ -528,7 +528,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onChildDismissed(View v) {
-        Log.d("YAAP","onChildDismissed");
         if (mDismissAllInProgress) {
             return;
         }
@@ -549,7 +548,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onChildSnappedBack(View animView) {
-        Log.d("YAAP","onChildSnappedBack");
         mAmbientState.onDragFinished(animView);
         if (!mDragAnimPendingChildren.contains(animView)) {
             if (mAnimationsEnabled) {
@@ -608,7 +606,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onBeginDrag(View v) {
-        Log.d("YAAP","On Begin drag");
         setSwipingInProgress(true);
         mAmbientState.onBeginDrag(v);
         if (mAnimationsEnabled) {
@@ -619,7 +616,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onDragCancelled(View v) {
-        Log.d("YAAP","On Drag cancelled");
 
 
         setSwipingInProgress(false);
@@ -745,7 +741,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void setSwipingInProgress(boolean isSwiped) {
-        Log.d("YAAP","Swiping in progress");
         mSwipingInProgress = isSwiped;
         if(isSwiped) {
             requestDisallowInterceptTouchEvent(true);
@@ -764,13 +759,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void dismissViewAnimated(View child, Runnable endRunnable, int delay, long duration) {
         child.setClipBounds(null);
-        Log.d("YAAP","Dismiss view animated");
         mSwipeHelper.dismissChild(child, 0, endRunnable, delay, true, duration);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        Log.d("YAAP","On touch event");
         boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
                 || ev.getActionMasked()== MotionEvent.ACTION_UP;
         if (mDelegateToScrollView) {
@@ -795,7 +788,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         boolean scrollerWantsIt = false;
         if (!mSwipingInProgress && !mExpandingNotification && !mDisallowScrollingInThisMotion) {
-            Log.d("YAAP","Scroller Swipe Wants it");
             scrollerWantsIt = onScrollTouch(ev);
         }
         boolean horizontalSwipeWantsIt = false;
@@ -803,7 +795,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && !mExpandingNotification
                 && !mExpandedInThisMotion
                 && !mOnlyScrollingInThisMotion) {
-            Log.d("YAAP","Horizontal Swipe Wants it");
             horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
         }
         return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || super.onTouchEvent(ev);
@@ -817,7 +808,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean onScrollTouch(MotionEvent ev) {
-        Log.d("YAAP","On scroll Touch");
         if (!isScrollingEnabled()) {
             return false;
         }
@@ -849,7 +839,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 break;
             }
             case MotionEvent.ACTION_MOVE:
-                Log.d("YAAP","OnScrollTouch ACTION_MOVE");
                 final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 if (activePointerIndex == -1) {
                     Log.e(TAG, "Invalid pointerId=" + mActivePointerId + " in onTouchEvent");
@@ -2149,7 +2138,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onChildAnimationFinished() {
-        Log.d("YAAP","onChildAnimationFinished");
         requestChildrenUpdate();
     }
 
@@ -2472,7 +2460,6 @@ public class NotificationStackScrollLayout extends ViewGroup
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {
-//        Log.d("YAAP","onChildLocationsChangedListener");
         public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
     }
 

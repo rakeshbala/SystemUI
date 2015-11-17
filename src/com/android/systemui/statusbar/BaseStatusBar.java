@@ -701,7 +701,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
-        Log.d("YAAP","Update veto - Base status bar");
 
         View vetoButton = row.findViewById(R.id.veto);
         if (n.isClearable() || (mHeadsUpNotificationView.getEntry() != null
@@ -1351,8 +1350,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         try {
             contentViewLocal = contentView.apply(mContext, expanded,
                     mOnClickHandler);
-            Log.d("YAAP","inflateViews - Base Status Bar");
-            Log.d("YAAP","Package name "+sbn.getPackageName());
             if (bigContentView != null) {
                 bigContentViewLocal = bigContentView.apply(mContext, expanded,
                         mOnClickHandler);
@@ -1373,7 +1370,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             //Add buttons to small view
             addMetaButtons(row, contentViewLocal);
-            Log.d("YAAP","Added button to content view");
         }
         if (bigContentViewLocal != null) {
             bigContentViewLocal.setIsRootNamespace(true);
@@ -1381,7 +1377,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             /** add buttons to big view **/
             addMetaButtons(row,bigContentViewLocal);
-            Log.d("YAAP","Added button to big content view");
         }
 
         // now the public version
@@ -1522,6 +1517,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 final StatusBarNotification sbn = parent.getStatusBarNotification();
                 Entry en = mNotificationData.remove(sbn.getKey(),null);
                 HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+                Log.d("YAAP", "BaseStatusBar - getSharedInstance");
                 hNotifData.add(en.notification.getKey(),en,en.notification);
                 ViewGroup icParent = (ViewGroup) en.icon.getParent();
                 if(icParent!=null){
