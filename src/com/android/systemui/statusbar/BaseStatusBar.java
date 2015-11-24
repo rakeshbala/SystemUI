@@ -27,6 +27,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.app.admin.DevicePolicyManager;
 import android.content.*;
+import android.content.HiddenNotificationData;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -46,6 +47,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -1521,8 +1523,15 @@ public abstract class BaseStatusBar extends SystemUI implements
             public void onClick(View view) {
                 final StatusBarNotification sbn = parent.getStatusBarNotification();
                 Entry en = mNotificationData.remove(sbn.getKey(),null);
-                HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
-                hNotifData.add(en.notification.getKey(),en,en.notification);
+
+
+
+                /** RB send add Intent **/
+                Intent addIntent = new Intent();
+                addIntent.setAction("com.android.systemui.addHN");
+                addIntent.putExtra("com.android.systemui.sbn",sbn);
+                mContext.sendBroadcast(addIntent);
+
                 ViewGroup icParent = (ViewGroup) en.icon.getParent();
                 if(icParent!=null){
                     icParent.removeView(en.icon);
@@ -1739,9 +1748,19 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected StatusBarNotification removeNotificationViews(String key, RankingMap ranking) {
         NotificationData.Entry entry = mNotificationData.remove(key, ranking);
         if (entry == null) {
+
             /** RB: remove from hidden Notif views. Hidden notif data shouldn't contain
              * notification if it is present in mNotificationData **/
-            entry = (Entry) HiddenNotificationData.getSharedInstance().remove(key);
+
+            HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+            entry = (Entry) hNotifData.remove(key);
+            Intent removeIn = new Intent();
+            removeIn.setAction("com.android.systemui.removeHN");
+            removeIn.putExtra("com.android.systemui.hnkey",key);
+
+            mContext.sendBroadcast(removeIn);
+
+
             if (entry == null){
                 Log.w(TAG, "removeNotification for unknown key: " + key);
             }
@@ -1788,6 +1807,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
         if(hNotifData.get(entry.notification.getKey()) != null){
             hNotifData.add(entry.notification.getKey(),entry,entry.notification);
+
             return;
         }
 
