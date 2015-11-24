@@ -412,7 +412,6 @@ public class SwipeHelper implements Gefingerpoken {
         switch (action) {
             case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_MOVE:
-                Log.d("YAAP","Swipe helper - on touch event - action move");
                 if (mCurrView != null) {
                     float delta = getPos(ev) - mInitialTouchPos;
                     float absDelta = Math.abs(delta);
@@ -442,7 +441,6 @@ public class SwipeHelper implements Gefingerpoken {
                         }
                         delta = 0;
                     }
-                    Log.d("YAAP","AbsDelta "+absDelta+" Delta "+delta);
 
                     setTranslation(mCurrAnimView, delta);
 
@@ -452,7 +450,6 @@ public class SwipeHelper implements Gefingerpoken {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (mCurrView != null) {
-                    Log.d("YAAP","Swipe helper touch event - ACTION_CANCEL");
                     float maxVelocity = MAX_DISMISS_VELOCITY * mDensityScale;
                     mVelocityTracker.computeCurrentVelocity(1000 /* px/sec */, maxVelocity);
                     float escapeVelocity = SWIPE_ESCAPE_VELOCITY * mDensityScale;
