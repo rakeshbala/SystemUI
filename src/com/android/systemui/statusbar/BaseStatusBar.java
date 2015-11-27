@@ -77,6 +77,7 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -1519,15 +1520,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                 final StatusBarNotification sbn = parent.getStatusBarNotification();
                 Entry en = mNotificationData.remove(sbn.getKey(),null);
 
-                /** RB send add Intent **/
-                Intent addIntent = new Intent();
-                addIntent.setAction("com.android.systemui.addHN");
-                addIntent.putExtra("com.android.systemui.sbn",sbn);
-                mContext.sendBroadcast(addIntent);
+
 
                 HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
-                Log.d("YAAP", "BaseStatusBar - getSharedInstance");
+                /** RB send add Intent **/
                 hNotifData.add(en.notification.getKey(),en,en.notification);
+
+                Intent addIntent = new Intent();
+                addIntent.setAction("com.android.systemui.updateMap");
+                addIntent.putExtra("com.android.systemui.sbnMap",hNotifData.getBundle());
+                mContext.sendBroadcast(addIntent);
+
 
                 ViewGroup icParent = (ViewGroup) en.icon.getParent();
                 if(icParent!=null){
@@ -1752,8 +1755,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
             entry = (Entry) hNotifData.remove(key);
             Intent removeIn = new Intent();
-            removeIn.setAction("com.android.systemui.removeHN");
-            removeIn.putExtra("com.android.systemui.hnkey",key);
+            removeIn.setAction("com.android.systemui.updateMap");
+            removeIn.putExtra("com.android.systemui.sbnMap",hNotifData.getBundle());
 
             mContext.sendBroadcast(removeIn);
 
@@ -1804,7 +1807,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
         if(hNotifData.get(entry.notification.getKey()) != null){
             hNotifData.add(entry.notification.getKey(),entry,entry.notification);
-
+            Intent addIntent = new Intent();
+            addIntent.setAction("com.android.systemui.updateMap");
+            addIntent.putExtra("com.android.systemui.sbnMap",hNotifData.getBundle());
+            mContext.sendBroadcast(addIntent);
             return;
         }
 
