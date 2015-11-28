@@ -617,6 +617,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         notifyUserAboutHiddenNotifications();
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
+
+
+        /** RB : Broadcast receiver **/
+        Log.d("YAAP","Registering SBN publisher");
+        SbnPublisher sbnPublisher = new SbnPublisher();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.android.settings.unhideNotif");
+        intentFilter.addAction("com.android.settings.publishSbn");
+        mContext.registerReceiver(sbnPublisher,intentFilter);
     }
 
     // ================================================================================

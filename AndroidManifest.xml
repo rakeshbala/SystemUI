@@ -169,6 +169,7 @@
             </intent-filter>
         </receiver>
 
+
         <activity android:name=".usb.UsbStorageActivity"
                   android:label="@*android:string/usb_storage_activity_title"
                   android:excludeFromRecents="true">

@@ -77,7 +77,6 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -1513,7 +1512,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private void addMetaButtons(final ExpandableNotificationRow parent, View sibling) {
         Button hide = createMetaButton(sibling, Color.BLUE,"Hide",1001);
-        Button close = createMetaButton(sibling,Color.RED, "Kill", 1002);
+        final Button close = createMetaButton(sibling,Color.RED, "Kill", 1002);
         hide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1526,17 +1525,20 @@ public abstract class BaseStatusBar extends SystemUI implements
                 /** RB send add Intent **/
                 hNotifData.add(en.notification.getKey(),en,en.notification);
 
-                Intent addIntent = new Intent();
-                addIntent.setAction("com.android.systemui.updateMap");
-                addIntent.putExtra("com.android.systemui.sbnMap",hNotifData.getBundle());
-                mContext.sendBroadcast(addIntent);
+                publishSbnMap();
 
+                view.getLayoutParams().width = 0;
+                view.requestLayout();
+
+                close.getLayoutParams().width = 0;
+                close.requestLayout();
 
                 ViewGroup icParent = (ViewGroup) en.icon.getParent();
                 if(icParent!=null){
                     icParent.removeView(en.icon);
                 }
                 ((ViewGroup)parent.getParent()).removeView(parent);
+
             }
         });
 
@@ -1754,11 +1756,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
             entry = (Entry) hNotifData.remove(key);
-            Intent removeIn = new Intent();
-            removeIn.setAction("com.android.systemui.updateMap");
-            removeIn.putExtra("com.android.systemui.sbnMap",hNotifData.getBundle());
-
-            mContext.sendBroadcast(removeIn);
+            publishSbnMap();
 
 
             if (entry == null){
@@ -1807,10 +1805,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
         if(hNotifData.get(entry.notification.getKey()) != null){
             hNotifData.add(entry.notification.getKey(),entry,entry.notification);
-            Intent addIntent = new Intent();
-            addIntent.setAction("com.android.systemui.updateMap");
-            addIntent.putExtra("com.android.systemui.sbnMap",hNotifData.getBundle());
-            mContext.sendBroadcast(addIntent);
+            publishSbnMap();
             return;
         }
 
@@ -1818,6 +1813,37 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateNotifications();
     }
 
+    private void publishSbnMap() {
+        Log.d("YAAP","Inside publish map");
+        Intent addStatIntent = new Intent();
+        addStatIntent.setAction("com.android.systemui.updateMapStat");
+        addStatIntent.putExtra("com.android.systemui.sbnMap", HiddenNotificationData
+                .getSharedInstance().getBundle());
+
+        Intent addIntent = new Intent();
+        addIntent.setAction("com.android.systemui.updateMap");
+        addIntent.putExtra("com.android.systemui.sbnMap", HiddenNotificationData
+                .getSharedInstance().getBundle());
+        mContext.sendBroadcast(addIntent);
+    }
+
+    public class SbnPublisher extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("YAAP","SBN Publisher"+intent.getAction());
+            if (intent.getAction().equals("com.android.settings.unhideNotif")){
+                String key = intent.getStringExtra("com.android.settings.sbnKey");
+                HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+                Entry sbnEntry = (Entry) hNotifData.remove(key);
+                mNotificationData.add(sbnEntry,null);
+                updateNotifications();
+
+            }else if(intent.getAction().equals("com.android.settings.publishSbn")){
+                publishSbnMap();
+            }
+        }
+    }
     /**
      * @return The number of notifications we show on Keyguard.
      */
