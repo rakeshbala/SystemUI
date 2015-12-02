@@ -81,6 +81,9 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+import android.content.SharedPreferences;
+import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
@@ -1511,7 +1514,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     private void addMetaButtons(final ExpandableNotificationRow parent, View sibling) {
-        Button hide = createMetaButton(sibling, Color.BLUE,"Hide",1001);
+        Button hide = createMetaButton(sibling, Color.BLUE, "Hide", 1001);
         final Button close = createMetaButton(sibling,Color.RED, "Kill", 1002);
         hide.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1571,7 +1574,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         RelativeLayout.LayoutParams hideParam = (RelativeLayout.LayoutParams) hide.getLayoutParams();
         hideParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         RelativeLayout.LayoutParams closeParam = (RelativeLayout.LayoutParams) close.getLayoutParams();
-        closeParam.addRule(RelativeLayout.RIGHT_OF,hide.getId());
+        closeParam.addRule(RelativeLayout.RIGHT_OF, hide.getId());
 
 
         RelativeLayout layout = new RelativeLayout(mContext);
@@ -1802,17 +1805,58 @@ public abstract class BaseStatusBar extends SystemUI implements
             return;
         }
         // Add the expanded view and icon.
-        HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
-        if(hNotifData.get(entry.notification.getKey()) != null){
-            hNotifData.add(entry.notification.getKey(),entry,entry.notification);
-            publishSbnMap();
-            return;
+        /* ktekchan - Check for app notification preferences */
+
+        if(!entry.notification.isClearable()){
+            String appName = entry.notification.getPackageName();
+            String key = appName + "_normal";
+            String filename = "notificationbin_settings";
+            SharedPreferences sharedPreferences;
+            Context settingContext = null;
+            try {
+                Log.d("YAAP", "settingContext");
+                settingContext = mContext.createPackageContext("com.android.settings", 0);
+                sharedPreferences = settingContext.getSharedPreferences(filename, Context.MODE_PRIVATE);
+                if(sharedPreferences.getBoolean(key, false)) {
+                    Log.d("YAAP", "Preference set to Hide");
+                    HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+                    if (hNotifData.get(entry.notification.getKey()) != null) {
+                        hNotifData.add(entry.notification.getKey(), entry, entry.notification);
+                        publishSbnMap();
+                        return;
+                    }
+                }
+            } catch (NameNotFoundException e){
+                Log.d("YAAP", "SharedPref Name not found");
+            }
+            /*String appName = entry.notification.getPackageName();
+            int appID = entry.notification.getId();
+            Intent getPreference = new Intent();
+            getPreference.setAction("com.android.systemui.getPreference");
+            getPreference.putExtra("com.android.systemui.appName", appName);
+            getPreference.putExtra("com.android.systemui.appID", appID);
+            mContext.sendBroadcast(getPreference);*/
         }
+
 
         mNotificationData.add(entry, ranking);
         updateNotifications();
     }
 
+    /* ktekchan - adding a receiver to get the app preference for persistent notifications*/
+    /*public class getAppPreference extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent){
+            Log.d("YAAP", "Get App Preference" + intent.getAction());
+            if(intent.getAction().equals("com.android.settings.sendPref")){
+                int prefFlag = intent.getIntExtra("com.android.settings.preferenceflag");
+                if (prefFlag == 1){
+
+                }
+            }
+        }
+    }*/
     private void publishSbnMap() {
         Log.d("YAAP","Inside publish map");
         Intent addStatIntent = new Intent();
