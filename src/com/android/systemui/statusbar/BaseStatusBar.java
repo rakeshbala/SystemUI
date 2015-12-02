@@ -1525,6 +1525,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 /** RB send add Intent **/
                 hNotifData.add(en.notification.getKey(),en,en.notification);
 
+                //TODO add dialog to ask if all stickes from current app need be disabled
+
+
                 publishSbnMap();
 
                 view.getLayoutParams().width = 0;
@@ -1802,12 +1805,21 @@ public abstract class BaseStatusBar extends SystemUI implements
             return;
         }
         // Add the expanded view and icon.
-        HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
-        if(hNotifData.get(entry.notification.getKey()) != null){
-            hNotifData.add(entry.notification.getKey(),entry,entry.notification);
-            publishSbnMap();
-            return;
+        if (!entry.notification.isClearable()){
+
+            //if this is a part of permanently disable sticky app
+                //ask settings if this is part of pref
+                //hNotifData.add(entry.notification.getKey(),entry,entry.notification);
+                //return
+
+            HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+            if(hNotifData.get(entry.notification.getKey()) != null){
+                hNotifData.add(entry.notification.getKey(),entry,entry.notification);
+                publishSbnMap();
+                return;
+            }
         }
+
 
         mNotificationData.add(entry, ranking);
         updateNotifications();
@@ -1815,11 +1827,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private void publishSbnMap() {
         Log.d("YAAP","Inside publish map");
-        Intent addStatIntent = new Intent();
-        addStatIntent.setAction("com.android.systemui.updateMapStat");
-        addStatIntent.putExtra("com.android.systemui.sbnMap", HiddenNotificationData
-                .getSharedInstance().getBundle());
-
         Intent addIntent = new Intent();
         addIntent.setAction("com.android.systemui.updateMap");
         addIntent.putExtra("com.android.systemui.sbnMap", HiddenNotificationData
