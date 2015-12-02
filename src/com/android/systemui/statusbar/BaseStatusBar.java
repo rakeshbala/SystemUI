@@ -1528,6 +1528,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 /** RB send add Intent **/
                 hNotifData.add(en.notification.getKey(),en,en.notification);
 
+                //TODO add dialog to ask if all stickes from current app need be disabled
+
+
                 publishSbnMap();
 
                 view.getLayoutParams().width = 0;
@@ -1807,7 +1810,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Add the expanded view and icon.
         /* ktekchan - Check for app notification preferences */
 
-        if(!entry.notification.isClearable()){
+        if(!entry.notification.isClearable()) {
             String appName = entry.notification.getPackageName();
             String key = appName + "_normal";
             String filename = "notificationbin_settings";
@@ -1817,7 +1820,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Log.d("YAAP", "settingContext");
                 settingContext = mContext.createPackageContext("com.android.settings", 0);
                 sharedPreferences = settingContext.getSharedPreferences(filename, Context.MODE_PRIVATE);
-                if(sharedPreferences.getBoolean(key, false)) {
+                if (sharedPreferences.getBoolean(key, false)) {
                     Log.d("YAAP", "Preference set to Hide");
                     HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
                     if (hNotifData.get(entry.notification.getKey()) != null) {
@@ -1826,44 +1829,16 @@ public abstract class BaseStatusBar extends SystemUI implements
                         return;
                     }
                 }
-            } catch (NameNotFoundException e){
+            } catch (NameNotFoundException e) {
                 Log.d("YAAP", "SharedPref Name not found");
             }
-            /*String appName = entry.notification.getPackageName();
-            int appID = entry.notification.getId();
-            Intent getPreference = new Intent();
-            getPreference.setAction("com.android.systemui.getPreference");
-            getPreference.putExtra("com.android.systemui.appName", appName);
-            getPreference.putExtra("com.android.systemui.appID", appID);
-            mContext.sendBroadcast(getPreference);*/
         }
-
-
         mNotificationData.add(entry, ranking);
         updateNotifications();
     }
 
-    /* ktekchan - adding a receiver to get the app preference for persistent notifications*/
-    /*public class getAppPreference extends BroadcastReceiver{
-
-        @Override
-        public void onReceive(Context context, Intent intent){
-            Log.d("YAAP", "Get App Preference" + intent.getAction());
-            if(intent.getAction().equals("com.android.settings.sendPref")){
-                int prefFlag = intent.getIntExtra("com.android.settings.preferenceflag");
-                if (prefFlag == 1){
-
-                }
-            }
-        }
-    }*/
     private void publishSbnMap() {
         Log.d("YAAP","Inside publish map");
-        Intent addStatIntent = new Intent();
-        addStatIntent.setAction("com.android.systemui.updateMapStat");
-        addStatIntent.putExtra("com.android.systemui.sbnMap", HiddenNotificationData
-                .getSharedInstance().getBundle());
-
         Intent addIntent = new Intent();
         addIntent.setAction("com.android.systemui.updateMap");
         addIntent.putExtra("com.android.systemui.sbnMap", HiddenNotificationData
