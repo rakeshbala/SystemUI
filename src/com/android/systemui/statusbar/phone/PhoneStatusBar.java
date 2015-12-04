@@ -40,11 +40,7 @@ import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks2;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -952,15 +948,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         int numChildren = mStackScroller.getChildCount();
 
         final ArrayList<View> viewsToHide = new ArrayList<View>(numChildren);
+        final ArrayList<View> stickyViewsToHide = new ArrayList<>(numChildren);
+
         for (int i = 0; i < numChildren; i++) {
             final View child = mStackScroller.getChildAt(i);
             if (mStackScroller.canChildBeDismissed(child)) {
                 if (child.getVisibility() == View.VISIBLE) {
                     viewsToHide.add(child);
                 }
+            }else {
+                if(child instanceof ExpandableNotificationRow){
+                    if(mPrefMap.get("clearAll") != null &&  mPrefMap.get("clearAll")){
+                        stickyViewsToHide.add(child);
+                    }
+                }
+
             }
         }
-        if (viewsToHide.isEmpty()) {
+
+
+        if (viewsToHide.isEmpty() && stickyViewsToHide.isEmpty()) {
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             return;
         }
@@ -976,6 +983,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         performDismissAllAnimations(viewsToHide);
 
+        for (View child : stickyViewsToHide) {
+            Button hide = (Button) child.findViewById(1001);
+            hide.performClick();
+        }
     }
 
     private void performDismissAllAnimations(ArrayList<View> hideAnimatedList) {
@@ -1008,6 +1019,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 endRunnable = animationFinishAction;
             }
             mStackScroller.dismissViewAnimated(view, endRunnable, totalDelay, 260);
+
             currentDelay = Math.max(50, currentDelay - rowDelayDecrement);
             totalDelay += currentDelay;
         }
@@ -1552,9 +1564,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updateClearAll() {
-        boolean showDismissView =
-                mState != StatusBarState.KEYGUARD &&
-                mNotificationData.hasActiveClearableNotifications();
+
+        Boolean hasNotifications = false;
+        for (Entry e : mNotificationData.getActiveNotifications()) {
+            if (e.expanded != null) { // the view successfully inflated
+                hasNotifications = true;
+            }
+        }
+
+        boolean showDismissView = mState != StatusBarState.KEYGUARD && hasNotifications;
+
+
+//        boolean showDismissView =
+//                mState != StatusBarState.KEYGUARD &&
+//                mNotificationData.hasActiveClearableNotifications();
+        Log.d("YAAP","hasNotifications "+hasNotifications);
         mStackScroller.updateDismissView(showDismissView);
     }
 

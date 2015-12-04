@@ -77,6 +77,7 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -126,6 +127,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     private static final String BANNER_ACTION_SETUP =
             "com.android.systemui.statusbar.banner_action_setup";
 
+
+    protected HashMap<String,Boolean> mPrefMap = new HashMap<>();
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
     protected H mHandler = createHandler();
@@ -590,6 +593,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
+        PreferenceReceiver prefRec = new PreferenceReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.android.settings.sendPref");
+        mContext.registerReceiver(prefRec,intentFilter);
+
+        requestSharedPref();
+
         updateCurrentProfilesCache();
     }
 
@@ -927,6 +937,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 a.setDuration(400);
                 a.setInterpolator(mLinearOutSlowIn);
                 a.start();
+
 
                 mNotificationGutsExposed = guts;
 
@@ -1521,16 +1532,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             public void onClick(View view) {
                 final StatusBarNotification sbn = parent.getStatusBarNotification();
                 Entry en = mNotificationData.remove(sbn.getKey(),null);
-
-
-
                 HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
                 /** RB send add Intent **/
                 hNotifData.add(en.notification.getKey(),en,en.notification);
-
-                //TODO add dialog to ask if all stickes from current app need be disabled
-
-
                 publishSbnMap();
 
                 view.getLayoutParams().width = 0;
@@ -1544,6 +1548,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     icParent.removeView(en.icon);
                 }
                 ((ViewGroup)parent.getParent()).removeView(parent);
+
 
             }
         });
@@ -1813,31 +1818,48 @@ public abstract class BaseStatusBar extends SystemUI implements
         if(!entry.notification.isClearable()) {
             String appName = entry.notification.getPackageName();
             String key = appName + "_normal";
-            String filename = "notificationbin_settings";
-            SharedPreferences sharedPreferences;
-            Context settingContext = null;
-            try {
-                Log.d("YAAP", "settingContext");
-                settingContext = mContext.createPackageContext("com.android.settings", 0);
-                sharedPreferences = settingContext.getSharedPreferences(filename, Context.MODE_PRIVATE);
-                if (sharedPreferences.getBoolean(key, false)) {
-                    Log.d("YAAP", "Preference set to Hide");
-                    HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
-                    if (hNotifData.get(entry.notification.getKey()) != null) {
-                        hNotifData.add(entry.notification.getKey(), entry, entry.notification);
-                        publishSbnMap();
-                        return;
-                    }
-                }
-            } catch (NameNotFoundException e) {
-                Log.d("YAAP", "SharedPref Name not found");
+            Log.d("YAAP", "mPrefMap -"+mPrefMap);
+            HiddenNotificationData hNotifData = HiddenNotificationData.getSharedInstance();
+            if (mPrefMap.get(key) != null && mPrefMap.get(key)){
+                Log.d("YAAP", "Preference set to Hide mPrefMap -"+mPrefMap);
+                hNotifData.add(entry.notification.getKey(), entry, entry.notification);
+                publishSbnMap();
+                return;
+            }else if(hNotifData.get(entry.notification.getKey()) != null) {
+                hNotifData.add(entry.notification.getKey(), entry, entry.notification);
+                publishSbnMap();
+                return;
             }
         }
         mNotificationData.add(entry, ranking);
         updateNotifications();
     }
 
-    private void publishSbnMap() {
+    /* ktekchan - Sending intent to request for the settings preferences*/
+    private void requestSharedPref(){
+        Log.d("YAAP", "Requesting preferences");
+        Intent requestIntent = new Intent();
+        requestIntent.setAction("com.android.systemui.getPreference");
+        mContext.sendBroadcast(requestIntent);
+    }
+
+    /* ktekchan - Receiver to accept the shared preferences sent by Settings */
+    public class PreferenceReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent){
+            Log.d("YAAP", "preference Receiver");
+            if(intent.getAction().equals("com.android.settings.sendPref")){
+                Bundle pref = intent.getBundleExtra("com.android.settings.prefBundle");
+                HashMap<String,Boolean> prefMap = new HashMap<>();
+                for (String key : pref.keySet()){
+                    prefMap.put(key,pref.getBoolean(key));
+                }
+                mPrefMap = prefMap;
+            }
+        }
+    }
+    public void publishSbnMap() {
         Log.d("YAAP","Inside publish map");
         Intent addIntent = new Intent();
         addIntent.setAction("com.android.systemui.updateMap");

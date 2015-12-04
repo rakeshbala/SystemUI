@@ -2340,6 +2340,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void updateDismissView(boolean visible) {
         int oldVisibility = mDismissView.willBeGone() ? GONE : mDismissView.getVisibility();
         int newVisibility = visible ? VISIBLE : GONE;
+        Log.d("YAAP","Old visibility "+oldVisibility + "will be gone "+mDismissView.willBeGone());
         if (oldVisibility != newVisibility) {
             if (newVisibility != GONE) {
                 if (mDismissView.willBeGone()) {
